@@ -1,0 +1,49 @@
+import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        Queue<Integer> queue = new LinkedList<>();
+        Scanner scan = new Scanner(System.in);
+        boolean exit = false;
+
+        while (!exit) {
+            System.out.println("1. Enqueue." + "\n" + "2. Dequeue."+ "\n" + "3. IsEmpty?" + "\n" + "4. Checking size..." + "\n" + "5. Exit." + "\n" + "Enter your choice: " );
+            int choose = scan.nextInt();
+
+            switch (choose) {
+                case 1:
+                    System.out.println();
+                    System.out.print("Enter a number to add in the Queue: ");
+                    int item = scan.nextInt();
+                    queue.add(item);
+                    System.out.println("Enqueue: " + item);
+                    break;
+                case 2:
+                    System.out.println();
+                    if (!queue.isEmpty()) {
+                        int removedItem = queue.remove();
+                        System.out.println("Dequeued: " + removedItem);
+                    } else {
+                        System.out.println("Queue is empty.");
+                    }
+                    break;
+                case 3:
+                    System.out.println();
+                    System.out.println("IsEmpty? " + queue.isEmpty());
+                    break;
+                case 4:
+                    System.out.println();
+                    System.out.println("Queue size is " + queue.size());
+                    break;
+                case 5:
+                    System.out.println();
+                    System.out.println("...Bye kathniel huhuhu...");
+                    exit = true;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please enter a valid option.");
+                    break;
+            }
+        }
+        scan.close();
+    }
+}
