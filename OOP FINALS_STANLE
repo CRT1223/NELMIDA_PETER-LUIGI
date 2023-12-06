@@ -1,0 +1,235 @@
+import java.util.*;
+
+abstract class Employee {
+    private int employeeId;
+    private String name;
+    protected double salary;
+    protected double deduction;
+
+    public Employee() {}
+
+    public Employee(int employeeId, String name) {
+        this.employeeId = employeeId;
+        this.name = name;
+    }
+
+    // Getters and Setters
+    public void setEmployeeId(int employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public int getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setDeduction(double deduction) {
+        this.deduction = deduction;
+    }
+
+    public double getDeduction() {
+        return deduction;
+    }
+
+    public void display() {
+        System.out.println("ID: " + employeeId);
+        System.out.println("Name: " + name);
+        System.out.println("Salary: " + salary);
+    }
+
+    public abstract double calculateSalary(double daysWorked);
+
+    public abstract double calculateDeduction();
+
+    public abstract double calculateNetPay();
+}
+
+class Doctor extends Employee {
+    private String specialization;
+
+    public Doctor(int employeeId, String name, String specialization) {
+        super(employeeId, name);
+        this.specialization = specialization;
+    }
+
+    // Getters and Setters
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    @Override
+    public void display() {
+        super.display();
+        System.out.println("Specialization: " + specialization);
+    }
+
+    @Override
+    public double calculateSalary(double daysWorked) {
+        double dailyRate;
+        switch (specialization) {
+            case "Pediatrician":
+                dailyRate = 2050;
+                break;
+            case "Ob-Gynecologist":
+                dailyRate = 2650;
+                break;
+            case "Neurologist":
+                dailyRate = 6575;
+                break;
+            default:
+                dailyRate = 0;
+                break;
+        }
+        salary = dailyRate * daysWorked;
+        return salary;
+    }
+
+    @Override
+    public double calculateDeduction() {
+        double salary = calculateSalary(30); // Assuming a month has 30 days
+        if (salary <= 10000) {
+            deduction = 0.03 * salary + 0.02 * salary + 0.05 * salary + 0.01 * salary;
+        } else if (salary <= 20000) {
+            deduction = 0.05 * salary + 0.04 * salary + 0.10 * salary + 0.025 * salary;
+        } else if (salary <= 30000) {
+            deduction = 0.07 * salary + 0.07 * salary + 0.15 * salary + 0.05 * salary;
+        } else {
+            deduction = 0.10 * salary + 0.10 * salary + 0.30 * salary + 0.08 * salary;
+        }
+        return deduction;
+    }
+
+    @Override
+    public double calculateNetPay() {
+        return salary - deduction;
+    }
+}
+
+class Programmer extends Employee {
+    private String language;
+
+    public Programmer() {}
+
+    public Programmer(int employeeId, String name, String language) {
+        super(employeeId, name);
+        this.language = language;
+    }
+
+    // Getters and Setters
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    @Override
+    public void display() {
+        super.display();
+        System.out.println("Programming Language: " + language);
+    }
+
+    @Override
+    public double calculateSalary(double daysWorked) {
+        double dailyRate = 950;
+        salary = dailyRate * daysWorked;
+        return salary;
+    }
+
+    @Override
+    public double calculateDeduction() {
+        double salary = calculateSalary(30); // Assuming a month has 30 days
+        deduction = 0.05 * salary + 0.03 * salary + 0.08 * salary + 0.03 * salary;
+        return deduction;
+    }
+
+    @Override
+    public double calculateNetPay() {
+        return salary - deduction;
+    }
+}
+
+public class TestClass {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int choice = 0;
+        
+        while (choice != 3) {
+            System.out.println("\nMAIN MENU");
+            System.out.println("[1] Doctor");
+            System.out.println("[2] Programmer");
+            System.out.println("[3] Exit");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            
+            if (choice == 1) {
+                System.out.print("Enter ID Number: ");
+                int empId = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                System.out.print("Enter Name: ");
+                String name = scanner.nextLine();
+                System.out.print("Enter Field of Specialization: ");
+                String specialization = scanner.nextLine();
+                System.out.print("Number of days worked: ");
+                int daysWorked = scanner.nextInt();
+                if (daysWorked > 30) {
+                    System.out.println("Days worked cannot exceed 30. Setting to maximum (30).");
+                    daysWorked = 30;
+                }
+
+                Doctor doctor = new Doctor(empId, name, specialization);
+                doctor.calculateSalary(daysWorked);
+                doctor.calculateDeduction();
+                doctor.display();
+                System.out.println("Deduction: " + doctor.getDeduction());
+                System.out.println("Net Pay: " + doctor.calculateNetPay());
+            } else if (choice == 2) {
+                System.out.print("Enter ID Number: ");
+                int empId = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                System.out.print("Enter Name: ");
+                String name = scanner.nextLine();
+                System.out.print("Enter Programming Language: ");
+                String language = scanner.nextLine();
+                System.out.print("Number of days worked: ");
+                int daysWorked = scanner.nextInt();
+                if (daysWorked > 30) {
+                    System.out.println("Days worked cannot exceed 30. Setting to maximum (30).");
+                    daysWorked = 30;
+                }
+
+                Programmer programmer = new Programmer(empId, name, language);
+                programmer.calculateSalary(daysWorked);
+                programmer.calculateDeduction();
+                programmer.display();
+                System.out.println("Deduction: " + programmer.getDeduction());
+                System.out.println("Net Pay: " + programmer.calculateNetPay());
+            } else if (choice == 3) {
+                System.out.println("Exiting...");
+            } else {
+                System.out.println("Invalid choice. Please enter a valid option.");
+            }
+        }
+        scanner.close();
+    }
+}
