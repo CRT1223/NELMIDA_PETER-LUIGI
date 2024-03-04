@@ -1,0 +1,207 @@
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Windows.Forms;
+
+public partial class ParkingForm : Form
+{
+    private const decimal MotorBikeRate = 20;
+    private const decimal SUVRate = 40;
+    private const decimal SedanRate = 30;
+    private const decimal VanRate = SUVRate;
+
+    private List<Vehicle> parkedVehicles;
+    private string parkingDataFile = "parking_data.txt";
+
+    public ParkingForm()
+    {
+        InitializeComponent();
+        LoadParkingData();
+        InitializeDropdowns();
+    }
+
+    private void LoadParkingData()
+    {
+        parkedVehicles = new List<Vehicle>();
+
+        if (File.Exists(parkingDataFile))
+        {
+            string[] lines = File.ReadAllLines(parkingDataFile);
+            foreach (string line in lines)
+            {
+                string[] data = line.Split(',');
+                parkedVehicles.Add(new Vehicle
+                {
+                    PlateNumber = data[0],
+                    Type = data[1],
+                    Brand = data[2],
+                    ParkIn = DateTime.Parse(data[3])
+                });
+            }
+        }
+    }
+
+    private void SaveParkingData()
+    {
+        using (StreamWriter writer = new StreamWriter(parkingDataFile))
+        {
+            foreach (Vehicle vehicle in parkedVehicles)
+            {
+                writer.WriteLine($"{vehicle.PlateNumber},{vehicle.Type},{vehicle.Brand},{vehicle.ParkIn}");
+            }
+        }
+    }
+
+    private void InitializeDropdowns()
+    {
+        string[] vehicleTypes = { "Motorbike", "SUV", "Van", "Sedan" };
+        comboBoxVehicleType.Items.AddRange(vehicleTypes);
+    }
+
+    private void comboBoxVehicleType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        comboBoxVehicleBrand.Items.Clear();
+
+        string selectedType = comboBoxVehicleType.SelectedItem?.ToString();
+
+        string[] brands;
+        switch (selectedType)
+        {
+            case "Motorbike":
+                brands = new string[] { "Skygo", "Honda", "Rusi" };
+                break;
+            case "SUV":
+                brands = new string[] { "Ford", "Toyota", "Honda CRV" };
+                break;
+            case "Van":
+                brands = new string[] { "Hiace", "Hyundai", "Nissan" };
+                break;
+            case "Sedan":
+                brands = new string[] { "BMW", "Bently", "Volkswagen" };
+                break;
+            default:
+                brands = new string[0];
+                break;
+        }
+
+        comboBoxVehicleBrand.Items.AddRange(brands);
+    }
+
+    private void btnParkVehicle_Click(object sender, EventArgs e)
+    {
+        PaymentMatrix();
+
+        string plateNumber = textBoxPlateNumber.Text;
+        string type = comboBoxVehicleType.SelectedItem?.ToString();
+        string brand = comboBoxVehicleBrand.SelectedItem?.ToString();
+
+        if (string.IsNullOrEmpty(plateNumber) || string.IsNullOrEmpty(type) || string.IsNullOrEmpty(brand))
+        {
+            MessageBox.Show("Please fill in all fields.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        Vehicle vehicle = new Vehicle
+        {
+            PlateNumber = plateNumber,
+            Type = type,
+            Brand = brand,
+            ParkIn = DateTime.Now
+        };
+
+        parkedVehicles.Add(vehicle);
+        SaveParkingData();
+
+        MessageBox.Show("Vehicle parked successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private void PaymentMatrix()
+    {
+        // Display payment matrix if needed
+    }
+
+    private void btnParkOut_Click(object sender, EventArgs e)
+    {
+        string plateNumber = textBoxPlateNumber.Text;
+
+        Vehicle vehicle = parkedVehicles.Find(v => v.PlateNumber.Equals(plateNumber, StringComparison.OrdinalIgnoreCase));
+        if (vehicle == null)
+        {
+            MessageBox.Show("Vehicle not found in the parking lot.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        DateTime parkOutTime = DateTime.Now;
+
+        TimeSpan parkingDuration = parkOutTime - vehicle.ParkIn;
+        long parkingHours = (long)Math.Ceiling(parkingDuration.TotalHours);
+        decimal parkingFee = CalculateParkingFee(parkingHours, vehicle.Type);
+
+        MessageBox.Show($"Parking fee: {parkingFee:C}\nParking duration: {parkingDuration.TotalHours:F} hours", 
+                        "Parking Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        parkedVehicles.Remove(vehicle);
+        SaveParkingData();
+    }
+
+    private decimal CalculateParkingFee(long hours, string type)
+    {
+        decimal baseRate = GetRatePerHour(type);
+        decimal additionalAmountPerHour = GetAdditionalAmountPerHour(type);
+        decimal totalFee = baseRate + (additionalAmountPerHour * (hours - 1));
+        return totalFee;
+    }
+
+    private decimal GetRatePerHour(string type)
+    {
+        switch (type.ToUpper())
+        {
+            case "MOTORBIKE":
+                return MotorBikeRate;
+            case "SUV":
+                return SUVRate;
+            case "VAN":
+                return VanRate;
+            case "SEDAN":
+                return SedanRate;
+            default:
+                throw new ArgumentException("Invalid vehicle type.");
+        }
+    }
+
+    private decimal GetAdditionalAmountPerHour(string type)
+    {
+        switch (type.ToUpper())
+        {
+            case "MOTORBIKE":
+                return 5.00m;
+            case "SUV":
+            case "VAN":
+                return 20.00m;
+            case "SEDAN":
+                return 15.00m;
+            default:
+                throw new ArgumentException("Invalid vehicle type.");
+        }
+    }
+}
+
+public class Vehicle
+{
+    public string PlateNumber { get; set; }
+    public string Type { get; set; }
+    public string Brand { get; set; }
+    public DateTime ParkIn { get; set; }
+}
+
+static class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new ParkingForm());
+    }
+}
