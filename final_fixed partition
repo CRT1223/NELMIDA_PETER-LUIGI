@@ -223,7 +223,6 @@ public class FixedPartitionSimulation extends JFrame {
 
     private void drawMemoryPartitions(Graphics g) {
         int x = 10;
-        int y = 10;
         int width = 200;
         int totalHeight = graphicalPanel.getHeight() - 20;
         int numPartitions = partitions.size();
@@ -232,23 +231,33 @@ public class FixedPartitionSimulation extends JFrame {
             int partitionHeight = totalHeight / (numPartitions + 1); // Add 1 for kernel OS
 
             // Draw kernel OS
-            int kernelHeight = (int) ((KERNEL / (double) ram) * totalHeight); // Adjust the kernel height based on the total RAM
             g.setColor(Color.ORANGE);
-            g.fillRect(x, y, width, kernelHeight);
+            g.fillRect(x, 10, width, partitionHeight);
             g.setColor(Color.BLACK);
-            g.drawRect(x, y, width, kernelHeight);
-            g.drawString("Kernel OS: " + KERNEL + " KB", x + 20, y + kernelHeight / 2);
+            g.drawRect(x, 10, width, partitionHeight);
+
+            // Center the text in the kernel OS partition
+            FontMetrics fm = g.getFontMetrics();
+            String osText = "OS " + KERNEL + "KB";
+            int osTextWidth = fm.stringWidth(osText);
+            int osTextHeight = fm.getHeight();
+            g.drawString(osText, x + (width - osTextWidth) / 2, 10 + (partitionHeight + osTextHeight) / 2 - fm.getDescent());
 
             for (int i = 0; i < partitions.size(); i++) {
-                int partitionTotalHeight = (totalHeight - kernelHeight) / numPartitions; // Height excluding kernel
-                int remainingHeight = (int) ((partitions.get(i) / (double) (ram - KERNEL)) * (totalHeight - kernelHeight));
+                int partitionTotalHeight = partitionHeight; // Fixed height for each partition
+                int remainingHeight = (int) ((partitions.get(i) / (double) (ram - KERNEL)) * totalHeight);
                 g.setColor(Color.GREEN);
-                g.fillRect(x, y + kernelHeight + (i * partitionTotalHeight), width, remainingHeight);
+                g.fillRect(x, 10 + partitionHeight + (i * partitionHeight), width, remainingHeight);
                 g.setColor(Color.RED);
-                g.fillRect(x, y + kernelHeight + (i * partitionTotalHeight) + remainingHeight, width, partitionTotalHeight - remainingHeight);
+                g.fillRect(x, 10 + partitionHeight + (i * partitionHeight) + remainingHeight, width, partitionTotalHeight - remainingHeight);
                 g.setColor(Color.BLACK);
-                g.drawRect(x, y + kernelHeight + (i * partitionTotalHeight), width, partitionTotalHeight);
-                g.drawString("Partition " + (i + 1) + ": " + partitions.get(i) + " KB remaining", x + 10, y + kernelHeight + (i * partitionTotalHeight) + partitionTotalHeight / 2);
+                g.drawRect(x, 10 + partitionHeight + (i * partitionHeight), width, partitionTotalHeight);
+
+                // Center the text in each partition
+                String partitionText = "Partition " + (i + 1) + ": " + partitions.get(i) + " KB remaining";
+                int partitionTextWidth = fm.stringWidth(partitionText);
+                int partitionTextHeight = fm.getHeight();
+                g.drawString(partitionText, x + (width - partitionTextWidth) / 2, 10 + partitionHeight + (i * partitionHeight) + (partitionTotalHeight + partitionTextHeight) / 2 - fm.getDescent());
             }
         }
     }
